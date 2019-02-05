@@ -1,21 +1,20 @@
 import * as React from "react";
+import { Item, ItemProps } from "./Item";
+import { Stats, StatsProps } from "./Stats"; 
 
-export interface CharacterSheetProps { name: string; gear: Item[] }
+export interface CharacterSheetProps { name: string; stats: StatsProps; gear: ItemProps[] }
 
-export interface CharacterSheetState { name: string; gear: Item[] }
+export interface CharacterSheetState { name: string; stats: StatsProps; gear: ItemProps[] }
 
-export interface Item { name: string; weight: number; }
-
-// 'CharacterSheetProps' describes the shape of props.
-// State is never set so we use the '{}' type.
 export class CharacterSheet extends React.Component<CharacterSheetProps, {}> {
     render() {
-        const gearHtml = this.props.gear.map((item: Item) => <li>{item.name}</li>);
+        const gearHtml = this.props.gear.map((item: ItemProps) => <Item {...item}/>);
         return <div>
             <div>
                 <label htmlFor="Name">Name:</label>
                 <input type="text" id="Name" value={this.props.name}/>
             </div>
+            <Stats {...this.props.stats} />
             <div>
                 <h1>Gear</h1>
                 <ul>
