@@ -8,7 +8,12 @@ export interface CharacterSheetState {
     name: string;
     stats: StatsProps;
     gear: ItemProps[];
-    addingGear: boolean;
+    newGearForm: NewGearForm;
+}
+
+export interface NewGearForm {
+    active: boolean;
+    newItem: ItemProps;
 }
 
 export enum Stat {
@@ -27,12 +32,22 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
             name: this.props.name,
             stats: this.props.stats,
             gear: this.props.gear,
-            addingGear: false,
+            newGearForm: {
+                active: false,
+                newItem: {
+                    count: 1,
+                    name: "",
+                    weight: 1,
+                },
+            },
         };
 
         this.enableNewGearForm = this.enableNewGearForm.bind(this);
         this.disableNewGearForm = this.disableNewGearForm.bind(this);
         this.addNewGear = this.addNewGear.bind(this);
+        this.handleNewGearCountChange = this.handleNewGearCountChange.bind(this);
+        this.handleNewGearNameChange = this.handleNewGearNameChange.bind(this);
+        this.handleNewGearWeightChange = this.handleNewGearWeightChange.bind(this);
         this.modifyStat = this.modifyStat.bind(this);
     }
 
@@ -58,20 +73,74 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
 
     enableNewGearForm() {
         this.setState((state: CharacterSheetState) => {
-            return {addingGear: true};
+            return {
+                newGearForm: {
+                    active: true,
+                    newItem: state.newGearForm.newItem,
+                }
+            };
         });
     }
 
     disableNewGearForm() {
         this.setState((state: CharacterSheetState) => {
-            return {addingGear: false};
+            return {
+                newGearForm: {
+                    active: false,
+                    newItem: state.newGearForm.newItem,
+                }
+            };
         });
     }
 
-    addNewGear(evt: any) {
-        console.log(evt.target.parentElement);
+    addNewGear() {
         this.setState((state: CharacterSheetState) => {
-            return {addingGear: false};
+            const gear = state.gear;
+            gear.push(state.newGearForm.newItem);
+            return {
+                gear: gear,
+                newGearForm: {
+                    active: false,
+                    newItem: {
+                        count: 1,
+                        name: "",
+                        weight: 1,
+                    },
+                }
+            }
+        });
+    }
+
+    handleNewGearCountChange(evt: any) {
+        const newCount: number = Number(evt.target.value);
+        this.setState((state: CharacterSheetState) => {
+            const newGearForm = state.newGearForm;
+            newGearForm.newItem.count = newCount;
+            return {
+                newGearForm: newGearForm,
+            };
+        });
+    }
+
+    handleNewGearNameChange(evt: any) {
+        const newName: string = evt.target.value;
+        this.setState((state: CharacterSheetState) => {
+            const newGearForm = state.newGearForm;
+            newGearForm.newItem.name = newName;
+            return {
+                newGearForm: newGearForm,
+            };
+        });
+    }
+
+    handleNewGearWeightChange(evt: any) {
+        const newWeight: number = Number(evt.target.value);
+        this.setState((state: CharacterSheetState) => {
+            const newGearForm = state.newGearForm;
+            newGearForm.newItem.weight = newWeight;
+            return {
+                newGearForm: newGearForm,
+            };
         });
     }
 
@@ -82,14 +151,14 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
         const statsProps: StatsProps = this.props.stats;
         statsProps.modifyStat = this.modifyStat;
         let addGearButton = (<button onClick={this.enableNewGearForm} className="list-group-item list-group-item-action">+ Add an item</button>);
-        if (this.state.addingGear) {
+        if (this.state.newGearForm.active) {
             addGearButton = (<li className="list-group-item">
-                <label htmlFor="NewGearCount">Count:</label>
-                <input type="text" id="NewGearCount" defaultValue="1"/>
-                <label htmlFor="NewGearName">Item name:</label>
-                <input type="text" id="NewGearName" defaultValue=""/>
-                <label htmlFor="NewGearWeight">Weight:</label>
-                <input type="text" id="NewGearWeight" defaultValue="1"/>
+                <label>Count:</label>
+                <input onChange={this.handleNewGearCountChange} type="text" id="NewGearCount" value={this.state.newGearForm.newItem.count}/>
+                <label>Item name:</label>
+                <input onChange={this.handleNewGearNameChange} type="text" id="NewGearName" value={this.state.newGearForm.newItem.name}/>
+                <label>Weight:</label>
+                <input onChange={this.handleNewGearWeightChange} type="text" id="NewGearWeight" value={this.state.newGearForm.newItem.weight}/>
                 <button onClick={this.addNewGear} type="button" className="btn btn-success">Add</button>
                 <button onClick={this.disableNewGearForm} type="button" className="btn btn-light">Back</button>
             </li>);
