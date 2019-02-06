@@ -1,4 +1,4 @@
-workflow "build" {
+workflow "static" {
   on = "push"
   resolves = ["build"]
 }
