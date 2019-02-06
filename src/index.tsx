@@ -13,9 +13,10 @@ const characterSheetProps: CharacterSheetProps = {
         intelligence: 10,
         wisdom: 10,
         charisma: 10,
+        modifyStat: undefined,
     },
 }
-const stats = ReactDOM.render(
+ReactDOM.render(
     <CharacterSheet {...characterSheetProps} />,
     document.getElementById("app")
 );
