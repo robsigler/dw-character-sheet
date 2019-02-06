@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
+    "upload": "ts-node scripts/upload.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -18,8 +19,14 @@
     "webpack": "^4.29.1"
   },
   "devDependencies": {
+    "@types/aws-sdk": "^2.7.0",
+    "@types/bluebird": "^3.5.25",
+    "@types/node": "^10.12.21",
     "awesome-typescript-loader": "^5.2.1",
+    "aws-sdk": "^2.397.0",
+    "bluebird": "^3.5.3",
     "source-map-loader": "^0.2.4",
+    "ts-node": "^8.0.2",
     "typescript": "^3.3.1",
     "webpack-cli": "^3.2.1"
   }
