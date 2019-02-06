@@ -5,7 +5,10 @@ import { CharacterSheet, CharacterSheetProps } from "./components/CharacterSheet
 
 const characterSheetProps: CharacterSheetProps = {
     name: "Helga",
-    gear: [{ name: "Adventuring Gear", weight: 1 }],
+    gear: [
+        { count: 3, name: "Adventuring Gear", weight: 1 },
+        { count: 1, name: "Enchanted Dagger", weight: 1 },
+    ],
     stats: {
         strength: 10,
         dexterity: 10,

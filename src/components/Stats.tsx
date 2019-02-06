@@ -18,7 +18,6 @@ export class Stats extends React.Component<StatsProps, {}> {
     }
 
     modifyStatClick(statName: string, delta: number) {
-        console.log("Hello, world!");
         return () => {
             this.props.modifyStat(statName, delta)
         };
@@ -35,7 +34,7 @@ export class Stats extends React.Component<StatsProps, {}> {
     }
 
     render() {
-        return (<div>
+        return (<div className="p-3">
             {this.renderStat("STR", "strength", this.props.strength)}
             {this.renderStat("DEX", "dexterity", this.props.dexterity)}
             {this.renderStat("CON", "constitution", this.props.constitution)}
