@@ -1,10 +1,13 @@
 import * as React from "react";
 
-export interface ItemProps { count: number; name: string; weight: number; }
+export interface Item { count: number; name: string; weight: number; }
 
-export class Item extends React.Component<ItemProps, {}> {
+export interface ItemProps { item: Item; itemId: number; }
+
+export class ItemElement extends React.Component<ItemProps, {}> {
     render() {
-        const text = this.props.count + " " + this.props.name + " (" + this.props.weight + " weight)";
+        const item: Item = this.props.item;
+        const text = item.count + " " + item.name + " (" + item.weight + " weight)";
         return <li className="list-group-item">{text}</li>
     }
 }

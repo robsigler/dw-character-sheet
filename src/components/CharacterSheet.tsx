@@ -1,14 +1,15 @@
 import * as React from "react";
-import { Item, ItemProps } from "./Item";
+import { ItemElement, Item, ItemProps } from "./Item";
 import { Stats, StatsProps } from "./Stats"; 
 import { Gear } from "./Gear";
 
-export interface CharacterSheetProps { name: string; stats: StatsProps; initialGear: ItemProps[] }
+export interface CharacterSheetProps { name: string; stats: StatsProps; initialGear: Item[] }
 
 export interface CharacterSheetState {
     name: string;
     stats: StatsProps;
     gear: ItemProps[];
+    nextGearKey: number;
 }
 
 export enum Stat {
@@ -23,10 +24,20 @@ export enum Stat {
 export class CharacterSheet extends React.Component<CharacterSheetProps, CharacterSheetState> {
     constructor(props: CharacterSheetProps) {
         super(props);
+
+        let nextGearKey = 1;
+
+        const gear = this.props.initialGear.map((item: Item) => {
+            const thisGearKey = nextGearKey;
+            nextGearKey = nextGearKey + 1;
+            return {item: item, itemId: thisGearKey};
+        })
+
         this.state = {
             name: this.props.name,
             stats: this.props.stats,
-            gear: this.props.initialGear,
+            gear: gear,
+            nextGearKey: nextGearKey,
         };
 
         this.modifyStat = this.modifyStat.bind(this);
@@ -53,11 +64,12 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
         });
     }
 
-    addGear(item: ItemProps) {
+    addGear(item: Item) {
         this.setState((state: CharacterSheetState) => {
-            state.gear.push(item)
+            state.gear.push({item: item, itemId: state.nextGearKey});
             return {
-                gear: state.gear
+                gear: state.gear,
+                nextGearKey: state.nextGearKey + 1,
             };
         })
     }

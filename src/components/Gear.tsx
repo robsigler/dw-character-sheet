@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Item, ItemProps } from "./Item";
+import { ItemElement, Item, ItemProps } from "./Item";
 import { Stats, StatsProps } from "./Stats"; 
 
 export interface GearProps {
@@ -14,7 +14,7 @@ export interface GearState {
 
 export interface NewGearForm {
     active: boolean;
-    newItem: ItemProps;
+    newItem: Item;
 }
 
 export class Gear extends React.Component<GearProps, GearState> {
@@ -111,8 +111,8 @@ export class Gear extends React.Component<GearProps, GearState> {
     }
 
     render() {
-        const gearHtml = this.props.gear.map((item: ItemProps) => <Item {...item}/>);
-        const load: number = this.props.gear.reduce(((load: number, item: ItemProps) => load + (item.weight * item.count)), 0);
+        const gearHtml = this.props.gear.map((itemProps: ItemProps) => <ItemElement key={itemProps.itemId} {...itemProps}/>);
+        const load: number = this.props.gear.reduce(((load: number, itemProps: ItemProps) => load + (itemProps.item.weight * itemProps.item.count)), 0);
         const maxLoad: number = this.props.stats.strength + 10;
         let addGearButton = (<button onClick={this.enableNewGearForm} className="list-group-item list-group-item-action">+ Add an item</button>);
         if (this.state.newGearForm.active) {
