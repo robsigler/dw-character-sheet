@@ -4,14 +4,10 @@
         "sourceMap": true,
         "noImplicitAny": true,
         "module": "commonjs",
-        "target": "es5",
-        "jsx": "react",
-		"lib": [
-            "ES2015"
-        ]
+        "target": "es2017"
     },
-    "include": [
-        "./src/**/*"
+    "files": [
+        "./hello.ts"
     ]
 }
 
