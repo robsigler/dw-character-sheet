@@ -1,3 +1,5 @@
+#!/bin/bash
+
 aws s3 cp index.html s3://robsiglerstatic/index.html
 aws s3 cp dist/bundle.js s3://robsiglerstatic/dist/bundle.js
 aws s3 cp dist/bundle.js.map s3://robsiglerstatic/dist/bundle.js.map
