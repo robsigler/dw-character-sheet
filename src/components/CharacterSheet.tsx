@@ -3,16 +3,12 @@ import { Item, ItemProps } from "./Item";
 import { Stats, StatsProps } from "./Stats"; 
 import { Gear } from "./Gear";
 
-export interface CharacterSheetProps { name: string; stats: StatsProps; gear: ItemProps[] }
+export interface CharacterSheetProps { name: string; stats: StatsProps; initialGear: ItemProps[] }
 
 export interface CharacterSheetState {
     name: string;
     stats: StatsProps;
-}
-
-export interface NewGearForm {
-    active: boolean;
-    newItem: ItemProps;
+    gear: ItemProps[];
 }
 
 export enum Stat {
@@ -30,9 +26,11 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
         this.state = {
             name: this.props.name,
             stats: this.props.stats,
+            gear: this.props.initialGear,
         };
 
         this.modifyStat = this.modifyStat.bind(this);
+        this.addGear = this.addGear.bind(this);
     }
 
     modifyStat(statName: string, delta: number) {
@@ -55,6 +53,15 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
         });
     }
 
+    addGear(item: ItemProps) {
+        this.setState((state: CharacterSheetState) => {
+            state.gear.push(item)
+            return {
+                gear: state.gear
+            };
+        })
+    }
+
     render() {
         const statsProps: StatsProps = this.props.stats;
         statsProps.modifyStat = this.modifyStat;
@@ -67,7 +74,7 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
             </div>
             <Stats {...statsProps} />
             <div className="p-3">
-                <Gear stats={this.state.stats} initialGear={this.props.gear}/>
+                <Gear addGear={this.addGear} stats={this.state.stats} gear={this.state.gear}/>
             </div>
         </div>;
     }
