@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ItemElement, Item, ItemProps } from "./Item";
+import { Item, ItemProps } from "./Item";
 import { Stats, StatsProps } from "./Stats"; 
 import { Gear } from "./Gear";
 
@@ -42,6 +42,7 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
 
         this.modifyStat = this.modifyStat.bind(this);
         this.addGear = this.addGear.bind(this);
+        this.saveState = this.saveState.bind(this);
     }
 
     modifyStat(statName: string, delta: number) {
@@ -74,21 +75,28 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
         })
     }
 
+    saveState() {
+        console.log(JSON.stringify(this.state));
+    }
+
     render() {
         const statsProps: StatsProps = this.props.stats;
         statsProps.modifyStat = this.modifyStat;
-        return <div>
+        return (<div>
             <div className="p-3">
                 <h1>
                     <label htmlFor="Name">Name:</label>
                     <input type="text" id="Name" defaultValue={this.props.name}/>
                 </h1>
             </div>
+            <div className="p-3">
+                <button onClick={this.saveState} type="button" className="btn btn-success">Save</button>
+            </div>
             <Stats {...statsProps} />
             <div className="p-3">
                 <Gear addGear={this.addGear} stats={this.state.stats} gear={this.state.gear}/>
             </div>
-        </div>;
+        </div>);
     }
 }
 
