@@ -1,15 +1,38 @@
-var yazl = require("yazl");
+var fs = require("fs");
+var archiver = require("archiver");
 
-var zipfile = new yazl.ZipFile();
-zipfile.addFile("dist/index.ts", "index.ts");
-// (add only files, not directories)
-zipfile.addFile("path/to/file.txt", "path/in/zipfile.txt");
-// pipe() can be called any time after the constructor
-zipfile.outputStream.pipe(fs.createWriteStream("output.zip")).on("close", function() {
-  console.log("done");
+const distZipPath: string = "./dist/lambda.zip";
+var output = fs.createWriteStream(distZipPath);
+var archive = archiver("zip", {
+  zlib: { level: 9 } // Sets the compression level.
 });
-// alternate apis for adding files:
-zipfile.addReadStream(process.stdin, "stdin.txt");
-zipfile.addBuffer(Buffer.from("hello"), "hello.txt");
-// call end() after all the files have been added
-zipfile.end();
+
+output.on("close", function() {
+  console.log(archive.pointer() + " total bytes written.");
+  console.log(distZipPath + " has been created.")
+});
+
+output.on("end", function() {
+  console.log("Data has been drained");
+});
+
+// good practice to catch warnings (ie stat failures and other non-blocking errors)
+archive.on("warning", function(err: any) {
+  if (err.code === "ENOENT") {
+    // log warning
+  } else {
+    // throw error
+    throw err;
+  }
+});
+
+// good practice to catch this error explicitly
+archive.on("error", function(err: any) {
+  throw err;
+});
+
+archive.pipe(output);
+var file1 = "./dist/index.js";
+archive.append(fs.createReadStream(file1), { name: "index.js" });
+archive.directory("node_modules", "node_modules");
+archive.finalize();
