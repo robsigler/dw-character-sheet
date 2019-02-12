@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "string": "^3.3.3",
+    "typescript": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^11.9.0"
+  }
+}
