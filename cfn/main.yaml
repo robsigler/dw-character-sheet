@@ -14,7 +14,28 @@ Resources:
     Properties:
       Code: "../ts-lambda/dist/lambda.zip"
       Handler: "index.handler"
-      MemorySize: 128
-      Role: "arn:aws:iam::050346343706:role/sam-app-HelloWorldFunctionRole-1T8R8DIG9JYSU"
+      MemorySize: 512
+      Role:
+        Fn::GetAtt: "SaveRole.Arn"
       Runtime: "nodejs8.10"
       Timeout: 5
+  SaveRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "root"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "dynamodb:PutItem"
+                Resource: "*"
