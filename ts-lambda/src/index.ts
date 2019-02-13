@@ -5,16 +5,14 @@ export const handler = async (event: any = {}): Promise<any> => {
     const putItemParams: DynamoDB.PutItemInput = {
         Item: {
             "Id": {
-                "N": "1"
+                "N": Number(event.id).toString()
             },
             "Sheet": {
-                "S": '{"name":"Helga","stats":{"strength":20,"dexterity":10,"constitution":10,"intelligence":10,"wisdom":10,"charisma":10},"gear":[{"item":{"count":3,"name":"Adventuring Gear","weight":1},"itemId":1},{"item":{"count":1,"name":"Enchanted Dagger","weight":1},"itemId":2}],"nextGearKey":3}'
+                "S": JSON.stringify(event.sheet)
             }
         },
         TableName: "dw-character-sheet-SheetTable-7SJTQH9CJTVG"
     };
     const output: DynamoDB.PutItemOutput = await dynamoDB.putItem(putItemParams).promise();
-    console.log('Hello World!');
-    const response = JSON.stringify(event, null, 2);
-    return response;
+    return {};
 }

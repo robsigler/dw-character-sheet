@@ -3,7 +3,6 @@
     "build": "tsc && ts-node scripts/build_dist.ts"
   },
   "dependencies": {
-    "string": "^3.3.3",
     "typescript": "^3.3.3"
   },
   "devDependencies": {
