@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export interface StatsProps { 
+export interface StatsProps {
     strength: number;
     dexterity: number;
     constitution: number;
@@ -26,22 +26,25 @@ export class Stats extends React.Component<StatsProps, {}> {
     renderStat(shortName: string, realName: string, value: number) {
         const text = shortName + ": " + value;
         return (
-        <div>
-            <button onClick={this.modifyStatClick(realName, -1)}>-</button>
-            {text}
-            <button onClick={this.modifyStatClick(realName, 1)}>+</button>
-        </div>);
+            <div className="col-sm">
+                <button onClick={this.modifyStatClick(realName, -1)}>-</button>
+                {text}
+                <button onClick={this.modifyStatClick(realName, 1)}>+</button>
+            </div>
+        );
     }
 
     render() {
-        return (<div className="p-3">
-            {this.renderStat("STR", "strength", this.props.strength)}
-            {this.renderStat("DEX", "dexterity", this.props.dexterity)}
-            {this.renderStat("CON", "constitution", this.props.constitution)}
-            {this.renderStat("INT", "intelligence", this.props.intelligence)}
-            {this.renderStat("WIS", "wisdom", this.props.wisdom)}
-            {this.renderStat("CHA", "charisma", this.props.charisma)}
-        </div>);
+        return (
+            <div className="row p-3">
+                {this.renderStat("STR", "strength", this.props.strength)}
+                {this.renderStat("DEX", "dexterity", this.props.dexterity)}
+                {this.renderStat("CON", "constitution", this.props.constitution)}
+                {this.renderStat("INT", "intelligence", this.props.intelligence)}
+                {this.renderStat("WIS", "wisdom", this.props.wisdom)}
+                {this.renderStat("CHA", "charisma", this.props.charisma)}
+            </div>
+        );
     }
 }
 
