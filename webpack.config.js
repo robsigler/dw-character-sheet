@@ -11,7 +11,7 @@ module.exports = {
 
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
-        extensions: [".ts", ".tsx", ".js", ".json"]
+        extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
     },
 
     module: {
@@ -20,12 +20,21 @@ module.exports = {
             { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
 
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-            { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
+            // { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
 
-            {
-                test: /\.css$/,
-                use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
-            },
+            // {
+            //     test: /\.jsx?$/,
+            //     exclude: /node_modules/,
+            //     loader: 'babel-loader',
+            //     query: {
+            //         presets: ['es2015', 'react']
+            //     }
+            // },
+
+            // {
+            //     test: /\.css$/,
+            //     use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
+            // },
         ]
     },
 
