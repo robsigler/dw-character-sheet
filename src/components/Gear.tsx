@@ -1,6 +1,6 @@
 import * as React from "react";
 import { ItemElement, Item, ItemProps } from "./Item";
-import { Stats, StatsProps } from "./Stats"; 
+import { StatsProps } from "./Stats";
 
 export interface GearProps {
     addGear: any;
@@ -111,18 +111,18 @@ export class Gear extends React.Component<GearProps, GearState> {
     }
 
     render() {
-        const gearHtml = this.props.gear.map((itemProps: ItemProps) => <ItemElement key={itemProps.itemId} {...itemProps}/>);
+        const gearHtml = this.props.gear.map((itemProps: ItemProps) => <ItemElement key={itemProps.itemId} {...itemProps} />);
         const load: number = this.props.gear.reduce(((load: number, itemProps: ItemProps) => load + (itemProps.item.weight * itemProps.item.count)), 0);
         const maxLoad: number = this.props.stats.strength + 10;
         let addGearButton = (<button onClick={this.enableNewGearForm} className="list-group-item list-group-item-action">+ Add an item</button>);
         if (this.state.newGearForm.active) {
             addGearButton = (<li className="list-group-item">
                 <label>Count:</label>
-                <input onChange={this.handleNewGearCountChange} type="text" id="NewGearCount" value={this.state.newGearForm.newItem.count}/>
+                <input onChange={this.handleNewGearCountChange} type="text" id="NewGearCount" value={this.state.newGearForm.newItem.count} />
                 <label>Item name:</label>
-                <input onChange={this.handleNewGearNameChange} type="text" id="NewGearName" value={this.state.newGearForm.newItem.name}/>
+                <input onChange={this.handleNewGearNameChange} type="text" id="NewGearName" value={this.state.newGearForm.newItem.name} />
                 <label>Weight:</label>
-                <input onChange={this.handleNewGearWeightChange} type="text" id="NewGearWeight" value={this.state.newGearForm.newItem.weight}/>
+                <input onChange={this.handleNewGearWeightChange} type="text" id="NewGearWeight" value={this.state.newGearForm.newItem.weight} />
                 <button onClick={this.addNewGear} type="button" className="btn btn-success">Add</button>
                 <button onClick={this.disableNewGearForm} type="button" className="btn btn-light">Back</button>
             </li>);

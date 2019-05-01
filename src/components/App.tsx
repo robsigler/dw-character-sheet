@@ -1,14 +1,12 @@
 import * as React from "react";
 import { withAuthenticator } from 'aws-amplify-react';
-import Amplify, { Auth } from 'aws-amplify';
+import Amplify from 'aws-amplify';
 import awsmobile from './aws-exports';
 
 import { CharacterSheet, CharacterSheetProps } from "./CharacterSheet";
-import { Login, LoginProps } from "./Login";
 
 Amplify.configure(awsmobile);
 
-const loggedIn = false;
 const characterSheetProps: CharacterSheetProps = {
     name: "Helga",
     initialGear: [
@@ -26,39 +24,9 @@ const characterSheetProps: CharacterSheetProps = {
     },
 }
 
-// export interface AppProps { }
-
-// export interface AppState {
-// }
-
-// export class App extends React.Component<AppProps, AppState> {
-//     constructor(props: CharacterSheetProps) {
-//         super(props);
-//     }
-
-//     render() {
-//         if (loggedIn) {
-//             return (
-//                 <CharacterSheet {...characterSheetProps} />
-//             );
-//         } else {
-//             const loginProps = {};
-//             return (
-//                 <Login {...loginProps} />
-//             );
-//         }
-//     }
-// }
-
 function App() {
     return (
-        <div className="App">
-            <header className="App-header">
-                <p>
-                    Edit <code>src/App.js</code> and save to reload.
-        </p>
-            </header>
-        </div>
+        <CharacterSheet {...characterSheetProps} />
     );
 }
 
