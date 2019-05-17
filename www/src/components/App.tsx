@@ -1,7 +1,6 @@
 import * as React from "react";
 import { withAuthenticator } from 'aws-amplify-react';
 import Amplify from 'aws-amplify';
-import { Auth } from 'aws-amplify';
 import awsmobile from './aws-exports';
 
 import { CharacterSheet, CharacterSheetProps } from "./CharacterSheet";
@@ -26,9 +25,6 @@ const characterSheetProps: CharacterSheetProps = {
 }
 
 function App() {
-    Auth.currentSession()
-        .then(data => console.log(data))
-        .catch(err => console.log(err));
     return (
         <CharacterSheet {...characterSheetProps} />
     );

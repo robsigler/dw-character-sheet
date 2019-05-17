@@ -1,6 +1,8 @@
 import * as React from "react";
+import { Auth, API } from 'aws-amplify';
+import axios from 'axios';
 import { Item, ItemProps } from "./Item";
-import { Stats, StatsProps } from "./Stats"; 
+import { Stats, StatsProps } from "./Stats";
 import { Gear } from "./Gear";
 
 export interface CharacterSheetProps { name: string; stats: StatsProps; initialGear: Item[] }
@@ -30,7 +32,7 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
         const gear = this.props.initialGear.map((item: Item) => {
             const thisGearKey = nextGearKey;
             nextGearKey = nextGearKey + 1;
-            return {item: item, itemId: thisGearKey};
+            return { item: item, itemId: thisGearKey };
         })
 
         this.state = {
@@ -61,13 +63,13 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
             } else if (statName === Stat.charisma) {
                 stats.charisma = stats.charisma + delta;
             }
-            return {stats:stats};
+            return { stats: stats };
         });
     }
 
     addGear(item: Item) {
         this.setState((state: CharacterSheetState) => {
-            state.gear.push({item: item, itemId: state.nextGearKey});
+            state.gear.push({ item: item, itemId: state.nextGearKey });
             return {
                 gear: state.gear,
                 nextGearKey: state.nextGearKey + 1,
@@ -75,8 +77,20 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
         })
     }
 
-    saveState() {
-        console.log(JSON.stringify(this.state));
+    async saveState() {
+        const user = await Auth.currentAuthenticatedUser();
+        const token = user.signInUserSession.idToken.jwtToken;
+
+        axios({
+            method: 'get',
+            url: '/api/hello',
+            headers: {
+                Authorization: token
+            }
+        })
+            .then(function (response) {
+                console.log(response);
+            });
     }
 
     render() {
@@ -86,7 +100,7 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
             <div className="p-3">
                 <h1>
                     <label htmlFor="Name">Name:</label>
-                    <input type="text" id="Name" defaultValue={this.props.name}/>
+                    <input type="text" id="Name" defaultValue={this.props.name} />
                 </h1>
             </div>
             <div className="p-3">
@@ -94,7 +108,7 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
             </div>
             <Stats {...statsProps} />
             <div className="p-3">
-                <Gear addGear={this.addGear} stats={this.state.stats} gear={this.state.gear}/>
+                <Gear addGear={this.addGear} stats={this.state.stats} gear={this.state.gear} />
             </div>
         </div>);
     }
