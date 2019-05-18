@@ -4,11 +4,11 @@
   "builds": [
     {
       "src": "api/hello",
-      "use": "@now/go"
+      "use": "@now/go@canary"
     },
     {
       "src": "www/package.json",
-      "use": "@now/static-build",
+      "use": "@now/static-build@canary",
       "config": {
         "distDir": "build"
       }

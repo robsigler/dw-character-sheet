@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Auth, API } from 'aws-amplify';
+import { Auth } from 'aws-amplify';
 import axios from 'axios';
 import { Item, ItemProps } from "./Item";
 import { Stats, StatsProps } from "./Stats";
@@ -80,7 +80,6 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
     async saveState() {
         const user = await Auth.currentAuthenticatedUser();
         const token = user.signInUserSession.idToken.jwtToken;
-
         axios({
             method: 'get',
             url: '/api/hello',
