@@ -1,4 +1,4 @@
-module hello
+module character
 
 go 1.12
 

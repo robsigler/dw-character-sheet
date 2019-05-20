@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"hello/auth"
+	"character/auth"
 )
 
 type Header struct {

@@ -81,8 +81,8 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
         const user = await Auth.currentAuthenticatedUser();
         const token = user.signInUserSession.idToken.jwtToken;
         axios({
-            method: 'get',
-            url: '/api/hello',
+            method: 'post',
+            url: '/api/character',
             headers: {
                 Authorization: token
             }
