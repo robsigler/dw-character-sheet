@@ -19,7 +19,7 @@
       "src": "/api/character",
       "dest": "/api/character/index.go",
       "methods": [
-        "POST"
+        "PUT"
       ]
     },
     {

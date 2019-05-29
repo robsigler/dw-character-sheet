@@ -80,12 +80,14 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
     async saveState() {
         const user = await Auth.currentAuthenticatedUser();
         const token = user.signInUserSession.idToken.jwtToken;
+        console.log(this.state.gear);
         axios({
-            method: 'post',
+            method: 'put',
             url: '/api/character',
             headers: {
                 Authorization: token
-            }
+            },
+            data: this.state
         })
             .then(function (response) {
                 console.log(response);
