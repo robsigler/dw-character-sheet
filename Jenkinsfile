@@ -20,7 +20,7 @@ pipeline {
 
       }
       steps {
-        sh 'cd api/character && go build'
+        sh 'cd api/character && GOCACHE=$PWD/.cache go build'
       }
     }
   }
