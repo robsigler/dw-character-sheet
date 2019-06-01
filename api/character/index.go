@@ -1,43 +1,43 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"
 
 	"character/auth"
 
 	"github.com/aws/aws-sdk-go/aws"
-    "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
 type CharacterState struct {
-	Id string `json:"id"`
-	Name string `json:"name"`
-	Stats Stats `json:"stats"`
-	Gear []ItemEntry `json:"gear"`
+	Id    string      `json:"id"`
+	Name  string      `json:"name"`
+	Stats Stats       `json:"stats"`
+	Gear  []ItemEntry `json:"gear"`
 }
 
 type Stats struct {
-	Strength int `json:"strength"`
-	Dexterity int `json:"dexterity"`
+	Strength     int `json:"strength"`
+	Dexterity    int `json:"dexterity"`
 	Constitution int `json:"constitution"`
 	Intelligence int `json:"intelligence"`
-	Wisdom int `json:"wisdom"`
-	Charisma int `json:"charisma"`
+	Wisdom       int `json:"wisdom"`
+	Charisma     int `json:"charisma"`
 }
 
 type ItemEntry struct {
-	Item Item `json:"item"`
-	ItemId int `json:"itemId"`
+	Item   Item `json:"item"`
+	ItemId int  `json:"itemId"`
 }
 
 type Item struct {
-	Count int `json:"count"`
-	Name string `json:"name"`
-	Weight int `json:"weight"`
+	Count  int    `json:"count"`
+	Name   string `json:"name"`
+	Weight int    `json:"weight"`
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +63,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	
+
 	svc := dynamodb.New(session.New())
 	input := &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
@@ -74,7 +74,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				S: aws.String(string(sheetJson)),
 			},
 		},
-		TableName:              aws.String("dw-character-sheet-SheetTable-7SJTQH9CJTVG"),
+		TableName: aws.String("dw-character-sheet-SheetTable-7SJTQH9CJTVG"),
 	}
 
 	result, err := svc.PutItem(input)
@@ -105,7 +105,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	
+
 	fmt.Println(result)
 
 	fmt.Fprintf(w, "Hello! You have been identified as %s", user)
