@@ -15,7 +15,7 @@ pipeline {
     stage('Build api') {
       agent {
         docker {
-          image 'golang:12'
+          image 'golang:1.12'
         }
 
       }
