@@ -1,11 +1,11 @@
-package handler
+package character
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"character/auth"
+	"api/character/auth"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -64,6 +64,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	body.Id = "1"
+
 	svc := dynamodb.New(session.New())
 	input := &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
@@ -74,7 +76,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				S: aws.String(string(sheetJson)),
 			},
 		},
-		TableName: aws.String("dw-character-sheet-SheetTable-7SJTQH9CJTVG"),
+		TableName: aws.String("dw-character-sheet-SheetTable-E9OWGTSTQH32"),
 	}
 
 	result, err := svc.PutItem(input)
