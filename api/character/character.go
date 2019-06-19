@@ -11,7 +11,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
+
+type CharacterStateRecord struct {
+	Sheet string
+}
 
 type CharacterState struct {
 	Id    string      `json:"id"`
@@ -42,7 +47,85 @@ type Item struct {
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Received request!")
+	if r.Method == "GET" {
+		Get(w, r)
+		return
+	}
+	if r.Method == "PUT" {
+		Put(w, r)
+		return
+	}
+	fmt.Fprintf(w, "Unsupported request method %s", r.Method)
+}
 
+func Get(w http.ResponseWriter, r *http.Request) {
+	_, err := auth.GetAuthentication(r)
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var body CharacterState
+	err = decoder.Decode(&body)
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	body.Id = "1"
+
+	svc := dynamodb.New(session.New(&aws.Config{
+		Region: aws.String("us-east-1"),
+	}))
+	input := &dynamodb.GetItemInput{
+		Key: map[string]*dynamodb.AttributeValue{
+			"Id": {
+				S: aws.String(body.Id),
+			},
+		},
+		TableName: aws.String("dw-character-sheet-SheetTable-E9OWGTSTQH32"),
+	}
+
+	result, err := svc.GetItem(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case dynamodb.ErrCodeConditionalCheckFailedException:
+				fmt.Println(dynamodb.ErrCodeConditionalCheckFailedException, aerr.Error())
+			case dynamodb.ErrCodeProvisionedThroughputExceededException:
+				fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
+			case dynamodb.ErrCodeResourceNotFoundException:
+				fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
+			case dynamodb.ErrCodeItemCollectionSizeLimitExceededException:
+				fmt.Println(dynamodb.ErrCodeItemCollectionSizeLimitExceededException, aerr.Error())
+			case dynamodb.ErrCodeTransactionConflictException:
+				fmt.Println(dynamodb.ErrCodeTransactionConflictException, aerr.Error())
+			case dynamodb.ErrCodeRequestLimitExceeded:
+				fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
+			case dynamodb.ErrCodeInternalServerError:
+				fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return
+	}
+
+	record := CharacterStateRecord{}
+	err = dynamodbattribute.UnmarshalMap(result.Item, &record)
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	fmt.Println(record)
+}
+
+func Put(w http.ResponseWriter, r *http.Request) {
 	user, err := auth.GetAuthentication(r)
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
@@ -66,7 +149,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	body.Id = "1"
 
-	svc := dynamodb.New(session.New())
+	svc := dynamodb.New(session.New(&aws.Config{
+		Region: aws.String("us-east-1"),
+	}))
 	input := &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"Id": {
