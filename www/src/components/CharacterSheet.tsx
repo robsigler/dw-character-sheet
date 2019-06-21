@@ -44,6 +44,7 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
 
         this.modifyStat = this.modifyStat.bind(this);
         this.addGear = this.addGear.bind(this);
+        this.getState = this.getState.bind(this);
         this.saveState = this.saveState.bind(this);
     }
 
@@ -77,6 +78,21 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
         })
     }
 
+    async getState() {
+        const user = await Auth.currentAuthenticatedUser();
+        const token = user.signInUserSession.idToken.jwtToken;
+        axios({
+            method: 'get',
+            url: '/api/character',
+            headers: {
+                Authorization: token
+            }
+        })
+            .then(function (response) {
+                console.log(response);
+            });
+    }
+
     async saveState() {
         const user = await Auth.currentAuthenticatedUser();
         const token = user.signInUserSession.idToken.jwtToken;
@@ -105,6 +121,7 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
                 </h1>
             </div>
             <div className="p-3">
+                <button onClick={this.getState} type="button" className="btn btn-success">Get</button>
                 <button onClick={this.saveState} type="button" className="btn btn-success">Save</button>
             </div>
             <Stats {...statsProps} />

@@ -15,6 +15,7 @@ import (
 )
 
 type CharacterStateRecord struct {
+	Id    string
 	Sheet string
 }
 
@@ -65,23 +66,13 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	decoder := json.NewDecoder(r.Body)
-	var body CharacterState
-	err = decoder.Decode(&body)
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-
-	body.Id = "1"
-
 	svc := dynamodb.New(session.New(&aws.Config{
 		Region: aws.String("us-east-1"),
 	}))
 	input := &dynamodb.GetItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
 			"Id": {
-				S: aws.String(body.Id),
+				S: aws.String("1"),
 			},
 		},
 		TableName: aws.String("dw-character-sheet-SheetTable-E9OWGTSTQH32"),
@@ -122,7 +113,14 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-	fmt.Println(record)
+
+	sheetJson, err := json.Marshal(record.Sheet)
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	w.Write(sheetJson)
 }
 
 func Put(w http.ResponseWriter, r *http.Request) {
