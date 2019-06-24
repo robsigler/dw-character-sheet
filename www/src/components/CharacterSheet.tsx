@@ -42,10 +42,18 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
             nextGearKey: nextGearKey,
         };
 
+        this.componentDidMount = this.componentDidMount.bind(this);
         this.modifyStat = this.modifyStat.bind(this);
         this.addGear = this.addGear.bind(this);
         this.getState = this.getState.bind(this);
         this.saveState = this.saveState.bind(this);
+    }
+
+    async componentDidMount() {
+        const stateFromDb = await this.getState();
+        this.setState((state: CharacterSheetState) => {
+            return stateFromDb
+        });
     }
 
     modifyStat(statName: string, delta: number) {
@@ -81,25 +89,27 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
     async getState() {
         const user = await Auth.currentAuthenticatedUser();
         const token = user.signInUserSession.idToken.jwtToken;
-        axios({
+        const userId = user.username;
+        console.log(user)
+        const response = await axios({
             method: 'get',
-            url: '/api/character',
+            url: '/api/character/' + userId,
             headers: {
                 Authorization: token
             }
-        })
-            .then(function (response) {
-                console.log(response);
-            });
+        });
+        const data = JSON.parse(response.data);
+        return data;
     }
 
     async saveState() {
         const user = await Auth.currentAuthenticatedUser();
         const token = user.signInUserSession.idToken.jwtToken;
+        const userId = user.username;
         console.log(this.state.gear);
         axios({
             method: 'put',
-            url: '/api/character',
+            url: '/api/character/' + userId,
             headers: {
                 Authorization: token
             },

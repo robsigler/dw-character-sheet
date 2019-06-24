@@ -8,11 +8,8 @@ import { CharacterSheet, CharacterSheetProps } from "./CharacterSheet";
 Amplify.configure(awsmobile);
 
 const characterSheetProps: CharacterSheetProps = {
-    name: "Helga",
-    initialGear: [
-        { count: 3, name: "Adventuring Gear", weight: 1 },
-        { count: 1, name: "Enchanted Dagger", weight: 1 },
-    ],
+    name: "",
+    initialGear: [],
     stats: {
         strength: 10,
         dexterity: 10,

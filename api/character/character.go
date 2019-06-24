@@ -7,6 +7,7 @@ import (
 
 	"api/character/auth"
 
+    "github.com/gorilla/mux"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -60,9 +61,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Get(w http.ResponseWriter, r *http.Request) {
-	_, err := auth.GetAuthentication(r)
+	authenticatedUser, err := auth.GetAuthentication(r)
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	vars := mux.Vars(r)
+	userId := vars["user"]
+	if authenticatedUser != userId {
+		fmt.Fprintf(w, "ERROR: not authenticated to get sheet for that user")
 		return
 	}
 
@@ -72,7 +80,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	input := &dynamodb.GetItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
 			"Id": {
-				S: aws.String("1"),
+				S: aws.String(userId),
 			},
 		},
 		TableName: aws.String("dw-character-sheet-SheetTable-E9OWGTSTQH32"),
@@ -120,13 +128,22 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type","application/json")
+	w.WriteHeader(http.StatusOK)
 	w.Write(sheetJson)
 }
 
 func Put(w http.ResponseWriter, r *http.Request) {
-	user, err := auth.GetAuthentication(r)
+	authenticatedUser, err := auth.GetAuthentication(r)
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	vars := mux.Vars(r)
+	userId := vars["user"]
+	if authenticatedUser != userId {
+		fmt.Fprintf(w, "ERROR: not authenticated to get sheet for that user")
 		return
 	}
 
@@ -145,7 +162,7 @@ func Put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body.Id = "1"
+	body.Id = userId
 
 	svc := dynamodb.New(session.New(&aws.Config{
 		Region: aws.String("us-east-1"),
@@ -193,5 +210,5 @@ func Put(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(result)
 
-	fmt.Fprintf(w, "Hello! You have been identified as %s", user)
+	fmt.Fprintf(w, "Hello! You have been identified as %s", authenticatedUser)
 }
