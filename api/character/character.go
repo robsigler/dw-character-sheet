@@ -2,18 +2,17 @@ package character
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
 
-	"api/character/auth"
-
-    "github.com/gorilla/mux"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
+
+type CharacterController struct {
+
+}
 
 type CharacterStateRecord struct {
 	Id    string
@@ -47,40 +46,15 @@ type Item struct {
 	Weight int    `json:"weight"`
 }
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Received request!")
-	if r.Method == "GET" {
-		Get(w, r)
-		return
-	}
-	if r.Method == "PUT" {
-		Put(w, r)
-		return
-	}
-	fmt.Fprintf(w, "Unsupported request method %s", r.Method)
-}
-
-func Get(w http.ResponseWriter, r *http.Request) {
-	authenticatedUser, err := auth.GetAuthentication(r)
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-
-	vars := mux.Vars(r)
-	userId := vars["user"]
-	if authenticatedUser != userId {
-		fmt.Fprintf(w, "ERROR: not authenticated to get sheet for that user")
-		return
-	}
-
+// Get ...
+func Get(userID string) (*CharacterState, error) {
 	svc := dynamodb.New(session.New(&aws.Config{
 		Region: aws.String("us-east-1"),
 	}))
 	input := &dynamodb.GetItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
 			"Id": {
-				S: aws.String(userId),
+				S: aws.String(userID),
 			},
 		},
 		TableName: aws.String("dw-character-sheet-SheetTable-E9OWGTSTQH32"),
@@ -89,80 +63,30 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	result, err := svc.GetItem(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case dynamodb.ErrCodeConditionalCheckFailedException:
-				fmt.Println(dynamodb.ErrCodeConditionalCheckFailedException, aerr.Error())
-			case dynamodb.ErrCodeProvisionedThroughputExceededException:
-				fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
-			case dynamodb.ErrCodeResourceNotFoundException:
-				fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
-			case dynamodb.ErrCodeItemCollectionSizeLimitExceededException:
-				fmt.Println(dynamodb.ErrCodeItemCollectionSizeLimitExceededException, aerr.Error())
-			case dynamodb.ErrCodeTransactionConflictException:
-				fmt.Println(dynamodb.ErrCodeTransactionConflictException, aerr.Error())
-			case dynamodb.ErrCodeRequestLimitExceeded:
-				fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
-			case dynamodb.ErrCodeInternalServerError:
-				fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
+			return nil, aerr
 		}
-		return
+		return nil, err
 	}
-
+	
 	record := CharacterStateRecord{}
 	err = dynamodbattribute.UnmarshalMap(result.Item, &record)
 	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
+		return nil, err
 	}
 
-	sheetJson, err := json.Marshal(record.Sheet)
+	var sheet CharacterState
+	err = json.Unmarshal([]byte(record.Sheet), &sheet)
 	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
+		return nil, err
 	}
-
-	w.Header().Set("Content-Type","application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(sheetJson)
+	return &sheet, nil
 }
 
-func Put(w http.ResponseWriter, r *http.Request) {
-	authenticatedUser, err := auth.GetAuthentication(r)
+func Put(userID string, sheet *CharacterState) error {
+	sheetJSON, err := json.Marshal(*sheet)
 	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
+		return err
 	}
-
-	vars := mux.Vars(r)
-	userId := vars["user"]
-	if authenticatedUser != userId {
-		fmt.Fprintf(w, "ERROR: not authenticated to get sheet for that user")
-		return
-	}
-
-	decoder := json.NewDecoder(r.Body)
-	var body CharacterState
-	err = decoder.Decode(&body)
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-	fmt.Println("Request body:")
-	fmt.Println(body)
-	sheetJson, err := json.Marshal(body)
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-
-	body.Id = userId
 
 	svc := dynamodb.New(session.New(&aws.Config{
 		Region: aws.String("us-east-1"),
@@ -170,45 +94,22 @@ func Put(w http.ResponseWriter, r *http.Request) {
 	input := &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"Id": {
-				S: aws.String(body.Id),
+				S: aws.String(userID),
 			},
 			"Sheet": {
-				S: aws.String(string(sheetJson)),
+				S: aws.String(string(sheetJSON)),
 			},
 		},
 		TableName: aws.String("dw-character-sheet-SheetTable-E9OWGTSTQH32"),
 	}
 
-	result, err := svc.PutItem(input)
+	_, err = svc.PutItem(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case dynamodb.ErrCodeConditionalCheckFailedException:
-				fmt.Println(dynamodb.ErrCodeConditionalCheckFailedException, aerr.Error())
-			case dynamodb.ErrCodeProvisionedThroughputExceededException:
-				fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
-			case dynamodb.ErrCodeResourceNotFoundException:
-				fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
-			case dynamodb.ErrCodeItemCollectionSizeLimitExceededException:
-				fmt.Println(dynamodb.ErrCodeItemCollectionSizeLimitExceededException, aerr.Error())
-			case dynamodb.ErrCodeTransactionConflictException:
-				fmt.Println(dynamodb.ErrCodeTransactionConflictException, aerr.Error())
-			case dynamodb.ErrCodeRequestLimitExceeded:
-				fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
-			case dynamodb.ErrCodeInternalServerError:
-				fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
+			return aerr
 		}
-		return
+		return err
 	}
 
-	fmt.Println(result)
-
-	fmt.Fprintf(w, "Hello! You have been identified as %s", authenticatedUser)
+	return nil
 }

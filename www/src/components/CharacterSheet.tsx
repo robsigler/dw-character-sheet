@@ -109,8 +109,7 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
                 Authorization: token
             }
         });
-        const data = JSON.parse(response.data);
-        return data;
+        return response.data;
     }
 
     async saveState() {
@@ -123,7 +122,7 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
             headers: {
                 Authorization: token
             },
-            data: this.state
+            data: this.state.character
         })
             .then(function (response) {
                 console.log(response);
