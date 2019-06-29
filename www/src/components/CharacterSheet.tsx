@@ -5,9 +5,14 @@ import { Item, ItemProps } from "./Item";
 import { Stats, StatsProps } from "./Stats";
 import { Gear } from "./Gear";
 
-export interface CharacterSheetProps { name: string; stats: StatsProps; initialGear: Item[] }
+export interface CharacterSheetProps { }
 
 export interface CharacterSheetState {
+    character: Character;
+    loaded: boolean;
+}
+
+export interface Character {
     name: string;
     stats: StatsProps;
     gear: ItemProps[];
@@ -27,19 +32,22 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
     constructor(props: CharacterSheetProps) {
         super(props);
 
-        let nextGearKey = 1;
-
-        const gear = this.props.initialGear.map((item: Item) => {
-            const thisGearKey = nextGearKey;
-            nextGearKey = nextGearKey + 1;
-            return { item: item, itemId: thisGearKey };
-        })
-
         this.state = {
-            name: this.props.name,
-            stats: this.props.stats,
-            gear: gear,
-            nextGearKey: nextGearKey,
+            character: {
+                name: "",
+                gear: [],
+                stats: {
+                    strength: 1,
+                    dexterity: 1,
+                    constitution: 1,
+                    intelligence: 1,
+                    wisdom: 1,
+                    charisma: 1,
+                    modifyStat: undefined
+                },
+                nextGearKey: 1,
+            },
+            loaded: false
         };
 
         this.componentDidMount = this.componentDidMount.bind(this);
@@ -52,36 +60,39 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
     async componentDidMount() {
         const stateFromDb = await this.getState();
         this.setState((state: CharacterSheetState) => {
-            return stateFromDb
+            return {
+                loaded: true,
+                character: stateFromDb
+            }
         });
     }
 
     modifyStat(statName: string, delta: number) {
         this.setState((state: CharacterSheetState) => {
-            const stats: StatsProps = state.stats;
+            const character: Character = state.character;
             if (statName === Stat.strength) {
-                stats.strength = stats.strength + delta;
+                character.stats.strength = character.stats.strength + delta;
             } else if (statName === Stat.dexterity) {
-                stats.dexterity = stats.dexterity + delta;
+                character.stats.dexterity = character.stats.dexterity + delta;
             } else if (statName === Stat.constitution) {
-                stats.constitution = stats.constitution + delta;
+                character.stats.constitution = character.stats.constitution + delta;
             } else if (statName === Stat.intelligence) {
-                stats.intelligence = stats.intelligence + delta;
+                character.stats.intelligence = character.stats.intelligence + delta;
             } else if (statName === Stat.wisdom) {
-                stats.wisdom = stats.wisdom + delta;
+                character.stats.wisdom = character.stats.wisdom + delta;
             } else if (statName === Stat.charisma) {
-                stats.charisma = stats.charisma + delta;
+                character.stats.charisma = character.stats.charisma + delta;
             }
-            return { stats: stats };
+            return { character: character };
         });
     }
 
     addGear(item: Item) {
         this.setState((state: CharacterSheetState) => {
-            state.gear.push({ item: item, itemId: state.nextGearKey });
+            state.character.gear.push({ item: item, itemId: state.character.nextGearKey });
+            state.character.nextGearKey = state.character.nextGearKey + 1;
             return {
-                gear: state.gear,
-                nextGearKey: state.nextGearKey + 1,
+                character: state.character
             };
         })
     }
@@ -106,7 +117,6 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
         const user = await Auth.currentAuthenticatedUser();
         const token = user.signInUserSession.idToken.jwtToken;
         const userId = user.username;
-        console.log(this.state.gear);
         axios({
             method: 'put',
             url: '/api/character/' + userId,
@@ -121,13 +131,16 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
     }
 
     render() {
-        const statsProps: StatsProps = this.props.stats;
+        const statsProps: StatsProps = this.state.character.stats;
         statsProps.modifyStat = this.modifyStat;
+        if (!this.state.loaded) {
+            return (<div>Loading...</div>)
+        }
         return (<div>
             <div className="p-3">
                 <h1>
                     <label htmlFor="Name">Name:</label>
-                    <input type="text" id="Name" defaultValue={this.props.name} />
+                    <input type="text" id="Name" defaultValue={this.state.character.name} />
                 </h1>
             </div>
             <div className="p-3">
@@ -136,7 +149,7 @@ export class CharacterSheet extends React.Component<CharacterSheetProps, Charact
             </div>
             <Stats {...statsProps} />
             <div className="p-3">
-                <Gear addGear={this.addGear} stats={this.state.stats} gear={this.state.gear} />
+                <Gear addGear={this.addGear} stats={this.state.character.stats} gear={this.state.character.gear} />
             </div>
         </div>);
     }
