@@ -2,15 +2,19 @@ package character
 
 import (
 	"encoding/json"
+	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+
+	"api/character/auth"
 )
 
-type CharacterController struct {
+type CharacterHandler struct {
 
 }
 
@@ -46,8 +50,24 @@ type Item struct {
 	Weight int    `json:"weight"`
 }
 
+func (h CharacterHandler) Get(c *gin.Context) {
+	userID := c.Param("user")
+
+	authenticatedUser, err := auth.GetAuthentication(c.Request)
+	if (err != nil) || authenticatedUser != userID {
+		c.JSON(http.StatusUnauthorized, gin.H{"status": "unauthorized"})
+		return
+	}
+	character, err := h.GetCharacter(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+	c.JSON(http.StatusOK, character)
+}
+
 // Get ...
-func Get(userID string) (*CharacterState, error) {
+func (h CharacterHandler) GetCharacter(userID string) (*CharacterState, error) {
 	svc := dynamodb.New(session.New(&aws.Config{
 		Region: aws.String("us-east-1"),
 	}))
@@ -82,7 +102,27 @@ func Get(userID string) (*CharacterState, error) {
 	return &sheet, nil
 }
 
-func Put(userID string, sheet *CharacterState) error {
+func (h CharacterHandler) Put(c *gin.Context) {
+	userID := c.Param("user")
+
+	authenticatedUser, err := auth.GetAuthentication(c.Request)
+	if (err != nil) || authenticatedUser != userID {
+		c.JSON(http.StatusUnauthorized, gin.H{"status": "unauthorized"})
+		return
+	}
+
+	var json CharacterState
+	c.BindJSON(&json)
+
+	err = h.PutCharacter(userID, &json)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "OK"})
+}
+
+func (h CharacterHandler) PutCharacter(userID string, sheet *CharacterState) error {
 	sheetJSON, err := json.Marshal(*sheet)
 	if err != nil {
 		return err
