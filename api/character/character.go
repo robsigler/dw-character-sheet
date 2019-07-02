@@ -4,18 +4,19 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/gin-gonic/gin"
 
 	"api/character/auth"
+	"api/pkg/config"
 )
 
 type CharacterHandler struct {
-
+	Config config.Configuration
 }
 
 type CharacterStateRecord struct {
@@ -69,7 +70,7 @@ func (h CharacterHandler) Get(c *gin.Context) {
 // Get ...
 func (h CharacterHandler) GetCharacter(userID string) (*CharacterState, error) {
 	svc := dynamodb.New(session.New(&aws.Config{
-		Region: aws.String("us-east-1"),
+		Region: aws.String(h.Config.Region),
 	}))
 	input := &dynamodb.GetItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
@@ -77,7 +78,7 @@ func (h CharacterHandler) GetCharacter(userID string) (*CharacterState, error) {
 				S: aws.String(userID),
 			},
 		},
-		TableName: aws.String("dw-character-sheet-SheetTable-E9OWGTSTQH32"),
+		TableName: aws.String(h.Config.Table),
 	}
 
 	result, err := svc.GetItem(input)
@@ -87,7 +88,7 @@ func (h CharacterHandler) GetCharacter(userID string) (*CharacterState, error) {
 		}
 		return nil, err
 	}
-	
+
 	record := CharacterStateRecord{}
 	err = dynamodbattribute.UnmarshalMap(result.Item, &record)
 	if err != nil {
@@ -129,7 +130,7 @@ func (h CharacterHandler) PutCharacter(userID string, sheet *CharacterState) err
 	}
 
 	svc := dynamodb.New(session.New(&aws.Config{
-		Region: aws.String("us-east-1"),
+		Region: aws.String(h.Config.Region),
 	}))
 	input := &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
@@ -140,7 +141,7 @@ func (h CharacterHandler) PutCharacter(userID string, sheet *CharacterState) err
 				S: aws.String(string(sheetJSON)),
 			},
 		},
-		TableName: aws.String("dw-character-sheet-SheetTable-E9OWGTSTQH32"),
+		TableName: aws.String(h.Config.Table),
 	}
 
 	_, err = svc.PutItem(input)
